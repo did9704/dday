@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="디데이">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffffff">
+<title>우리의 날들</title>
+<style>
+  :root{--ink:#2b2d42;--sub:#9aa0b4;--line:#eef0f5}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;
+    padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 32px)}
+  .wrap{max-width:420px;margin:0 auto}
+  html{background:#fff}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 -20px 14px;
+    padding:10px 20px 12px;position:sticky;top:env(safe-area-inset-top);z-index:5;background:#fff}
+  .topcover{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#fff;z-index:6}
+  h1{font-size:26px;font-weight:800;letter-spacing:-.5px;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:0}
+  h1 .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  h1 .pen{font-size:14px;color:#c4c8d6;font-weight:400}
+  .add{flex:none;width:48px;height:48px;border-radius:18px;border:0;background:#ff7a9c;color:#fff;
+    font-size:30px;line-height:1;box-shadow:0 6px 16px rgba(255,122,156,.35);cursor:pointer}
+  .add:active{transform:scale(.94)}
+  .card{border-radius:28px;padding:20px 20px 18px;margin-bottom:14px;background:#fff;
+    border:1px solid var(--line);box-shadow:0 8px 24px rgba(120,130,170,.10);cursor:pointer;
+    animation:pop .45s cubic-bezier(.2,1.4,.4,1) both}
+  .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s}
+  .card.press{transform:scale(.97)}
+  .pin{font-size:13px;margin-left:6px}
+  .menu{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;z-index:11;padding:0 14px calc(env(safe-area-inset-bottom) + 14px);
+    transform:translateY(110%);visibility:hidden;transition:transform .25s cubic-bezier(.2,.9,.3,1),visibility 0s .25s}
+  .menu.on{transform:none;visibility:visible;transition-delay:0s}
+  .menu .grp{background:#fff;border-radius:20px;overflow:hidden;margin-top:8px}
+  .menu .head{font-size:13px;color:var(--sub);text-align:center;padding:14px 10px 10px;border-bottom:1px solid var(--line)}
+  .menu button{display:block;width:100%;font:inherit;font-size:17px;padding:16px;border:0;background:#fff;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line)}
+  .menu button:last-child{border-bottom:0}
+  .menu .x{font-weight:700;color:#6b7089}
+  /* 순서 바꾸기 */
+  .rbar{display:none;align-items:center;justify-content:space-between;background:#f6f7fb;border-radius:16px;padding:10px 12px 10px 16px;margin-bottom:12px;font-size:13.5px;color:#6b7089}
+  .rbar button{font:inherit;font-weight:700;font-size:14px;border:0;background:#2b2d42;color:#fff;padding:9px 16px;border-radius:12px;cursor:pointer}
+  body.reorder .rbar{display:flex}
+  body.reorder .add{visibility:hidden}
+  body.reorder .card{padding:12px 14px;animation:none;cursor:default}
+  body.reorder .card .big,body.reorder .card .chips,body.reorder .card .bar,body.reorder .card .barlbl,body.reorder .card .agebtn{display:none}
+  body.reorder .card .icon{width:42px;height:42px;font-size:24px;border-radius:15px}
+  .handle{display:none;margin-left:auto;font-size:22px;color:#b4b8c8;padding:8px 6px 8px 14px;touch-action:none;cursor:grab}
+  body.reorder .handle{display:block}
+  .card.drag{position:relative;z-index:3;box-shadow:0 14px 30px rgba(80,90,130,.22);transform:scale(1.02)}
+  /* 고양이 나이표 */
+  .agebtn{display:block;flex:none;align-self:flex-start;margin:2px 0 0 auto;white-space:nowrap;font:inherit;font-size:12.5px;font-weight:700;border:0;background:var(--bg);color:var(--t);padding:8px 13px;border-radius:999px;cursor:pointer}
+  .agelist{margin-top:4px}
+  .agerow{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+  .agerow .a{font-weight:800;font-size:16px;width:52px}
+  .agerow .d{font-size:12.5px;color:var(--sub);flex:1}
+  .agerow .h{font-size:13px;font-weight:700;color:#6b7089;width:74px;text-align:right}
+  .agerow .s{font-size:12px;font-weight:700;width:58px;text-align:right;color:#b4b8c8}
+  .agerow.past{opacity:.55}
+  .agerow.now{background:#fff1d6;border-radius:14px;border-bottom-color:transparent;padding-left:10px;padding-right:10px;opacity:1}
+  .agerow.now .s{color:#b47c12}
+  .agerow.next .s{color:#ff7a9c}
+  @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}}
+  .top{display:flex;align-items:center;gap:14px}
+  .icon{width:54px;height:54px;border-radius:20px;display:grid;place-items:center;font-size:30px;flex:none;background:var(--bg)}
+  .name{font-size:18px;font-weight:700}
+  .date{font-size:13px;color:var(--sub);margin-top:3px}
+  .big{font-size:40px;font-weight:800;letter-spacing:-1px;text-align:right;margin-top:14px;line-height:1.1;color:var(--c)}
+  .big small{font-size:22px;font-weight:700;margin-left:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-top:10px}
+  .chip{font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;background:#f3f4f8;color:#6b7089}
+  .chip.hi{background:var(--bg);color:var(--t)}
+  .bar{height:8px;border-radius:99px;background:#f3f4f8;margin-top:14px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;background:var(--c)}
+  .barlbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:6px}
+  .empty{text-align:center;color:var(--sub);padding:60px 0;font-size:15px;line-height:1.7}
+  .note{font-size:11.5px;color:var(--sub);text-align:center;margin-top:10px;line-height:1.5}
+
+  /* 아래에서 올라오는 편집 창 */
+  .dim{position:fixed;inset:0;background:rgba(30,32,50,.35);opacity:0;pointer-events:none;transition:.2s;z-index:10}
+  .dim.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;background:#fff;z-index:11;
+    border-radius:28px 28px 0 0;padding:10px 20px calc(env(safe-area-inset-bottom) + 20px);
+    transform:translateY(105%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.9,.3,1),visibility 0s .28s;max-height:92vh;overflow:auto}
+  .sheet.on{transform:none;visibility:visible;transition-delay:0s}
+  .grab{width:40px;height:5px;border-radius:9px;background:#e3e5ec;margin:0 auto 14px}
+  .sheet h2{font-size:19px;font-weight:800;margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:700;color:#6b7089;margin:14px 0 7px}
+  input[type=text],input[type=date]{width:100%;font:inherit;font-size:16px;padding:13px 14px;border-radius:14px;
+    border:1.5px solid var(--line);background:#fafbfd;color:var(--ink);-webkit-appearance:none;appearance:none}
+  input:focus{outline:none;border-color:#ffb3c6}
+  .emojirow{display:flex;gap:10px;align-items:center}
+  .emojirow .emojibox{width:64px;height:64px;flex:none;font-size:36px;text-align:center;padding:0!important;border-radius:20px!important;caret-color:transparent}
+  .emojihint{font-size:12.5px;color:var(--sub);line-height:1.5}
+  .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .quick button{font-size:24px;width:42px;height:42px;border-radius:13px;border:0;background:#f5f6f9;cursor:pointer}
+  .seg{display:flex;background:#f3f4f8;border-radius:14px;padding:4px}
+  .seg button{flex:1;border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;padding:10px;border-radius:11px;color:#8a8fa5;cursor:pointer}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+  .colors{display:flex;flex-wrap:wrap;gap:8px}
+  .colors button{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);cursor:pointer}
+  .colors button.on{box-shadow:0 0 0 2.5px var(--ink)}
+  .btns{display:flex;gap:10px;margin-top:22px}
+  .btns button{flex:1;font:inherit;font-size:16px;font-weight:700;padding:15px;border-radius:16px;border:0;cursor:pointer}
+  .save{background:#ff7a9c;color:#fff}
+  .cancel{background:#f3f4f8;color:#6b7089}
+  .del{flex:none!important;background:#fff0f0;color:#e5484d;padding:15px 18px!important}
+  .msg{font-size:12.5px;color:#e5484d;margin-top:10px;min-height:1em}
+  .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(20px);
+    background:#2b2d42;color:#fff;font-size:13.5px;padding:11px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:20;white-space:nowrap;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="topcover"></div>
+<div class="wrap">
+  <header>
+    <h1 id="title"><span class="t"></span><span class="pen">✎</span></h1>
+    <button class="add" id="addBtn" aria-label="디데이 추가">+</button>
+  </header>
+  <div class="rbar"><span>≡ 를 잡고 위아래로 끌어 옮겨요</span><button id="rDone">완료</button></div>
+  <main id="list"></main>
+  <p class="note" id="catNote"></p>
+</div>
+
+<div class="dim" id="dim"></div>
+
+<!-- 디데이 추가/편집 -->
+<div class="sheet" id="itemSheet">
+  <div class="grab"></div>
+  <h2 id="sheetTitle">디데이 추가</h2>
+  <label>아이콘</label>
+  <div class="emojirow">
+    <input type="text" class="emojibox" id="fIcon" inputmode="text" autocomplete="off" aria-label="아이콘 이모지">
+    <div class="emojihint">네모를 누르고 키보드의 🙂 버튼으로<br>아이폰 이모지를 골라주세요.</div>
+  </div>
+  <div class="quick" id="quick"></div>
+  <label for="fName">이름</label>
+  <input type="text" id="fName" placeholder="예: 첫 출근" maxlength="20">
+  <label for="fDate">날짜</label>
+  <input type="date" id="fDate">
+  <label>계산 방식</label>
+  <div class="seg" id="fType">
+    <button data-v="since" class="on">날짜 세기</button>
+    <button data-v="cat">고양이 나이</button>
+  </div>
+  <label>색깔</label>
+  <div class="colors" id="fColor"></div>
+  <div class="btns">
+    <button class="del" id="delBtn">삭제</button>
+    <button class="cancel" data-close>취소</button>
+    <button class="save" id="saveBtn">저장</button>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<!-- 제목 편집 -->
+<div class="sheet" id="titleSheet">
+  <div class="grab"></div>
+  <h2>제목 바꾸기</h2>
+  <input type="text" id="fTitle" maxlength="20">
+  <div class="btns">
+    <button class="cancel" data-close>취소</button>
+    <button class="save" id="titleSave">저장</button>
+  </div>
+  <label style="margin-top:26px">데이터 백업</label>
+  <div class="emojihint">디데이 목록은 이 휴대폰에만 저장돼요. 가끔 백업 코드를 복사해서 메모장 등에 보관해 두세요.</div>
+  <div class="btns" style="margin-top:10px">
+    <button class="cancel" id="bkCopy">백업 코드 복사</button>
+    <button class="cancel" id="bkShow">백업으로 복원</button>
+  </div>
+  <div id="bkArea" style="display:none">
+    <textarea id="bkText" rows="4" placeholder="여기에 백업 코드를 붙여넣으세요" style="width:100%;margin-top:10px;font:inherit;font-size:14px;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:#fafbfd"></textarea>
+    <div class="btns" style="margin-top:8px"><button class="save" id="bkRestore">복원하기</button></div>
+  </div>
+</div>
+
+<div class="menu" id="menu">
+  <div class="grp">
+    <div class="head" id="menuHead"></div>
+    <button id="mPin"></button>
+    <button id="mEdit">편집하기</button>
+    <button id="mMove">순서 바꾸기</button>
+    <button id="mDel" style="color:#e5484d">삭제하기</button>
+  </div>
+  <div class="grp"><button class="x" data-close>취소</button></div>
+</div>
+
+<!-- 고양이 나이표 -->
+<div class="sheet" id="ageSheet">
+  <div class="grab"></div>
+  <h2 id="ageTitle">나이표</h2>
+  <div class="emojihint">생일 기준으로 나이가 바뀌어요. 사람 나이는 대략적인 환산이에요.</div>
+  <div class="agelist" id="ageList"></div>
+  <div class="btns"><button class="cancel" data-close>닫기</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+// c: 큰 숫자·막대 색, bg: 아이콘 배경, t: 작은 글씨 색(연한 색은 조금 진하게)
+const COLORS = {
+  pink:  {c:"#ff7a9c", bg:"#ffe8ef"},
+  coral: {c:"#ff5b3f", bg:"#ffe5df"},
+  peach: {c:"#ea994d", bg:"#fdeedd", t:"#c9762b"},
+  sun:   {c:"#f5bf55", bg:"#fff1d6", t:"#b47c12"},   // 연주황빛 옐로우
+  mint:  {c:"#2fbf98", bg:"#dcf6ee"},
+  sky:   {c:"#4c9cf5", bg:"#e3f0ff"},
+  grape: {c:"#9b7bf0", bg:"#efe9ff"},
+  cocoa: {c:"#8d6f5e", bg:"#f1e8e2"}
+};
+const QUICK = ["🏡","📦","🐱","🐶","🎂","💍","💕","✈️","🎓","💼","🌱","⭐️"];
+const DAY = 86400000, WD = ["일","월","화","수","목","금","토"];
+const $ = id => document.getElementById(id);
+
+// 기록은 이 휴대폰(브라우저)에만 저장돼요. 코드 안에는 아무 기록도 없어요.
+let state = { title: "디데이", items: [] };
+try {
+  const local = JSON.parse(localStorage.getItem("dday-state") || "null");
+  const v1 = JSON.parse(localStorage.getItem("dday-private-v1") || "null");  // 잠깐 쓰던 버전의 기록
+  if (local && Array.isArray(local.items) && local.items.length) state = local;
+  else if (v1 && Array.isArray(v1.items) && v1.items.length) state = v1;
+} catch (e) {}
+
+const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmt = d => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}(${WD[d.getDay()]})`;
+const diffDays = (a,b) => Math.round((b-a)/DAY);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function ym(from,to){
+  let m = (to.getFullYear()-from.getFullYear())*12 + (to.getMonth()-from.getMonth());
+  if (to.getDate() < from.getDate()) m--;
+  return {y:Math.floor(m/12), m:m%12, total:m};
+}
+function catToHuman(months){
+  const y = months/12;
+  if (y < 1) return Math.round(15*y);
+  if (y < 2) return Math.round(15 + 9*(y-1));
+  return 24 + 4*(Math.floor(y)-2);
+}
+
+function render(){
+  $("title").querySelector(".t").textContent = state.title || "디데이";
+  document.title = state.title || "디데이";
+  const t = today();
+  if (!state.items.length) {
+    $("list").innerHTML = `<div class="empty">아직 디데이가 없어요<br>오른쪽 위 <b>+</b> 버튼으로 추가해 보세요</div>`;
+  } else {
+    const sorted = [...state.items.filter(i => i.pinned), ...state.items.filter(i => !i.pinned)];
+    $("list").innerHTML = sorted.map(it => {
+      const col = COLORS[it.color] || COLORS.pink;
+      const start = parse(it.date);
+      const gap = diffDays(start, t);
+      let body;
+      if (gap < 0) {                       // 아직 안 온 날
+        const w = Math.floor(-gap/7), d = -gap%7;
+        body = `<div class="big">D-${(-gap).toLocaleString()}</div>
+          <div class="chips"><span class="chip">${w ? w+"주 " : ""}${d ? d+"일 " : ""}남음</span></div>`;
+      } else if (it.type === "cat") {
+        const p = ym(start, t);
+        let next = new Date(t.getFullYear(), start.getMonth(), start.getDate());
+        if (next < t) next.setFullYear(next.getFullYear()+1);
+        const left = diffDays(t, next);
+        body = `
+          <div class="big">${p.y}<small>살</small> ${p.m}<small>개월</small></div>
+          <div class="chips">
+            <span class="chip hi">사람 나이로 약 ${catToHuman(p.total)}살</span>
+            <span class="chip">${left===0 ? "🎂 오늘 생일!" : "다음 생일 D-" + left}</span>
+          </div>`;
+      } else {
+        const p = ym(start, t);
+        body = `<div class="big">${(gap+1).toLocaleString()}<small>일</small></div>
+          <div class="chips"><span class="chip">${p.y ? p.y+"년 " : ""}${p.m}개월째</span></div>`;
+      }
+      return `<section class="card" data-id="${esc(it.id)}" style="--c:${col.c};--bg:${col.bg};--t:${col.t||col.c}">
+        <div class="top"><div class="icon">${esc(it.icon)}</div>
+        <div><div class="name">${esc(it.name)}${it.pinned ? '<span class="pin">📌</span>' : ""}</div><div class="date">${fmt(start)}</div></div>${it.type === "cat" ? '<button class="agebtn" type="button">나이표 ›</button>' : ""}<div class="handle">≡</div></div>${body}</section>`;
+    }).join("");
+  }
+  $("catNote").textContent = state.items.some(i => i.type === "cat")
+    ? "고양이 나이는 흔히 쓰이는 환산 기준(1살=15세, 2살=24세, 이후 1년마다 +4세)으로 계산했어요." : "";
+}
+
+/* ---------- 저장 (이 휴대폰 안에) ---------- */
+function toast(text){
+  const el = $("toast"); el.textContent = text; el.classList.add("on");
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 2200);
+}
+function persist(){
+  state.savedAt = Date.now();
+  render();
+  try { localStorage.setItem("dday-state", JSON.stringify(state)); toast("저장했어요"); }
+  catch (e) { toast("저장하지 못했어요"); }
+}
+
+/* ---------- 창 열고 닫기 ---------- */
+function openSheet(id){ $("dim").classList.add("on"); $(id).classList.add("on"); }
+function closeSheets(){ $("dim").classList.remove("on"); document.querySelectorAll(".sheet,.menu").forEach(s => s.classList.remove("on")); document.activeElement && document.activeElement.blur(); }
+$("dim").onclick = closeSheets;
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
+
+/* ---------- 디데이 추가/편집 ---------- */
+let editing = null, fType = "since", fColor = "pink";
+$("quick").innerHTML = QUICK.map(e => `<button type="button">${e}</button>`).join("");
+$("quick").onclick = e => { if (e.target.tagName === "BUTTON") $("fIcon").value = e.target.textContent; };
+$("fColor").innerHTML = Object.entries(COLORS).map(([k,v]) => `<button type="button" data-v="${k}" style="background:${v.c}"></button>`).join("");
+function setType(v){ fType = v; $("fType").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+function setColor(v){ fColor = v; $("fColor").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+$("fType").onclick = e => { if (e.target.dataset.v) setType(e.target.dataset.v); };
+$("fColor").onclick = e => { if (e.target.dataset.v) setColor(e.target.dataset.v); };
+
+// 이모지 칸: 마지막에 입력한 이모지 하나만 남겨요
+function firstEmoji(s){
+  s = s.trim(); if (!s) return "";
+  if (window.Intl && Intl.Segmenter) { const segs = [...new Intl.Segmenter().segment(s)]; return segs[segs.length-1].segment; }
+  return [...s].slice(-1)[0];
+}
+$("fIcon").addEventListener("input", e => { e.target.value = firstEmoji(e.target.value); });
+
+function openItem(it){
+  editing = it ? it.id : null;
+  $("sheetTitle").textContent = it ? "디데이 편집" : "디데이 추가";
+  $("fIcon").value = it ? it.icon : "⭐️";
+  $("fName").value = it ? it.name : "";
+  $("fDate").value = it ? it.date : new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  setType(it ? it.type : "since");
+  const keys = Object.keys(COLORS);
+  setColor(it ? it.color : keys[state.items.length % keys.length]);
+  $("delBtn").style.display = it ? "" : "none";
+  $("msg").textContent = "";
+  openSheet("itemSheet");
+}
+$("addBtn").onclick = () => openItem(null);
+// 꾹 누르면 고정 메뉴, 짧게 누르면 편집
+let pressTimer = null, longFired = false, pressCard = null, startXY = null, menuId = null;
+function openMenu(id){
+  const it = state.items.find(i => i.id === id); if (!it) return;
+  menuId = id;
+  $("menuHead").textContent = it.name;
+  $("mPin").textContent = it.pinned ? "고정 해제" : "맨 위에 고정";
+  $("mDel").dataset.armed = ""; $("mDel").textContent = "삭제하기";
+  if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
+  $("dim").classList.add("on"); $("menu").classList.add("on");
+}
+function cancelPress(){ clearTimeout(pressTimer); pressTimer = null; if (pressCard) pressCard.classList.remove("press"); }
+$("list").addEventListener("pointerdown", e => {
+  const card = e.target.closest(".card"); if (!card) return;
+  longFired = false;
+  if (document.body.classList.contains("reorder") || e.target.closest(".agebtn")) return; pressCard = card; startXY = [e.clientX, e.clientY];
+  card.classList.add("press");
+  pressTimer = setTimeout(() => { longFired = true; cancelPress(); openMenu(card.dataset.id); }, 500);
+});
+$("list").addEventListener("pointermove", e => {
+  if (pressTimer && startXY && Math.hypot(e.clientX-startXY[0], e.clientY-startXY[1]) > 10) cancelPress();
+});
+["pointerup","pointercancel","pointerleave"].forEach(t => $("list").addEventListener(t, cancelPress));
+$("list").addEventListener("contextmenu", e => { if (e.target.closest(".card")) e.preventDefault(); });
+$("list").addEventListener("click", e => {
+  const card = e.target.closest(".card"); if (!card) return;
+  if (longFired) { longFired = false; return; }
+  if (document.body.classList.contains("reorder")) return;
+  if (e.target.closest(".agebtn")) { openAges(state.items.find(i => i.id === card.dataset.id)); return; }
+  openItem(state.items.find(i => i.id === card.dataset.id));
+});
+$("mPin").onclick = () => {
+  const it = state.items.find(i => i.id === menuId); if (!it) return;
+  it.pinned = !it.pinned;
+  if (it.pinned) { state.items = [it, ...state.items.filter(i => i !== it)]; }  // 최근 고정한 게 맨 위
+  closeSheets(); persist();
+};
+$("mDel").onclick = () => {
+  const btn = $("mDel");
+  if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "정말 삭제할까요? 한 번 더 누르세요"; return; }
+  state.items = state.items.filter(i => i.id !== menuId);
+  closeSheets(); persist();
+};
+$("mMove").onclick = () => { closeSheets(); startReorder(); };
+
+/* ---------- 순서 바꾸기 ---------- */
+function startReorder(){
+  // 화면에 보이는 순서(고정 먼저)를 그대로 저장 순서로 맞춰요
+  state.items = [...state.items.filter(i => i.pinned), ...state.items.filter(i => !i.pinned)];
+  document.body.classList.add("reorder"); window.scrollTo({top:0, behavior:"smooth"});
+}
+$("rDone").onclick = () => {
+  document.body.classList.remove("reorder");
+  const ids = [...$("list").querySelectorAll(".card")].map(c => c.dataset.id);
+  state.items.sort((a,b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  persist();
+};
+let dragEl = null, dragY = 0;
+$("list").addEventListener("pointerdown", e => {
+  const h = e.target.closest(".handle"); if (!h || !document.body.classList.contains("reorder")) return;
+  e.preventDefault(); e.stopPropagation();
+  dragEl = h.closest(".card"); dragY = e.clientY; dragEl.classList.add("drag");
+  try { h.setPointerCapture(e.pointerId); } catch (_) {}
+}, true);
+document.addEventListener("pointermove", e => {
+  if (!dragEl) return;
+  e.preventDefault();
+  dragEl.style.transform = `translateY(${e.clientY - dragY}px) scale(1.02)`;
+  const cards = [...$("list").querySelectorAll(".card")];
+  const i = cards.indexOf(dragEl);
+  const prev = cards[i-1], next = cards[i+1];
+  const r = dragEl.getBoundingClientRect(), mid = r.top + r.height/2;
+  if (prev) { const pr = prev.getBoundingClientRect(); if (mid < pr.top + pr.height/2) { $("list").insertBefore(dragEl, prev); dragY -= pr.height + 14; dragEl.style.transform = `translateY(${e.clientY - dragY}px) scale(1.02)`; } }
+  if (next) { const nr = next.getBoundingClientRect(); if (mid > nr.top + nr.height/2) { $("list").insertBefore(next, dragEl); dragY += nr.height + 14; dragEl.style.transform = `translateY(${e.clientY - dragY}px) scale(1.02)`; } }
+}, {passive:false});
+function endDrag(){ if (!dragEl) return; dragEl.classList.remove("drag"); dragEl.style.transform = ""; dragEl = null; }
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+
+/* ---------- 고양이 나이표 ---------- */
+function openAges(it){
+  const start = parse(it.date), t = today();
+  const cur = ym(start, t);
+  $("ageTitle").textContent = `${it.name}의 나이표`;
+  const rows = [];
+  for (let y = 0; y <= 25; y++) {
+    const bd = new Date(start.getFullYear() + y, start.getMonth(), start.getDate());
+    const gap = diffDays(t, bd);
+    let cls = "", st = "";
+    if (y === cur.y) { cls = "now"; st = "지금"; }
+    else if (gap < 0) { cls = "past"; st = "지남"; }
+    else { cls = y === cur.y + 1 ? "next" : ""; st = "D-" + gap.toLocaleString(); }
+    rows.push(`<div class="agerow ${cls}"><span class="a">${y === 0 ? "탄생" : y + "살"}</span><span class="d">${fmt(bd)}</span><span class="h">${y === 0 ? "" : "사람 " + catToHuman(y*12) + "살"}</span><span class="s">${st}</span></div>`);
+  }
+  $("ageList").innerHTML = rows.join("");
+  openSheet("ageSheet");
+  setTimeout(() => { const n = $("ageList").querySelector(".now"); if (n) n.scrollIntoView({block:"center"}); }, 300);
+}
+
+$("mEdit").onclick = () => { const it = state.items.find(i => i.id === menuId); closeSheets(); setTimeout(() => openItem(it), 260); };
+$("saveBtn").onclick = () => {
+  const name = $("fName").value.trim(), date = $("fDate").value;
+  if (!name) { $("msg").textContent = "이름을 적어주세요"; return; }
+  if (!date) { $("msg").textContent = "날짜를 골라주세요"; return; }
+  const data = { name, date, icon: $("fIcon").value || "⭐️", type: fType, color: fColor };
+  if (editing) Object.assign(state.items.find(i => i.id === editing), data);
+  else state.items.unshift({ id: "i" + Date.now().toString(36), ...data });  // 맨 위(고정 아래)에 추가
+  closeSheets(); persist();
+};
+let delArmed = false;
+$("delBtn").onclick = () => {
+  if (!delArmed) { delArmed = true; $("delBtn").textContent = "정말?"; setTimeout(() => { delArmed = false; $("delBtn").textContent = "삭제"; }, 2500); return; }
+  delArmed = false; $("delBtn").textContent = "삭제";
+  state.items = state.items.filter(i => i.id !== editing);
+  closeSheets(); persist();
+};
+
+/* ---------- 제목 편집 ---------- */
+$("title").onclick = () => { $("fTitle").value = state.title; openSheet("titleSheet"); };
+$("titleSave").onclick = () => { state.title = $("fTitle").value.trim() || "디데이"; closeSheets(); persist(); };
+
+$("bkCopy").onclick = async () => {
+  const code = JSON.stringify({title: state.title, items: state.items});
+  try { await navigator.clipboard.writeText(code); toast("백업 코드를 복사했어요"); }
+  catch (e) { $("bkArea").style.display = ""; $("bkText").value = code; $("bkText").select(); toast("아래 코드를 직접 복사해 주세요"); }
+};
+$("bkShow").onclick = () => { $("bkArea").style.display = ""; $("bkText").value = ""; $("bkText").focus(); };
+$("bkRestore").onclick = () => {
+  try {
+    const d = JSON.parse($("bkText").value.trim());
+    if (!Array.isArray(d.items)) throw 0;
+    state = { title: d.title || "디데이", items: d.items };
+    closeSheets(); persist(); toast("복원했어요");
+  } catch (e) { toast("백업 코드가 올바르지 않아요"); }
+};
+
+render();
+</script>
+</body>
+</html>
